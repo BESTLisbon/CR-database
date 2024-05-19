@@ -11,3 +11,11 @@ services:
     ports:
       - "5001:5000"
     container_name: cr-backend
+  db:
+    image: postgres:latest
+    container_name: cr-database
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./data:/docker-entrypoint-initdb.d
