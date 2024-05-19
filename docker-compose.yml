@@ -6,3 +6,8 @@ services:
     ports:
       - "3000:3000"
     container_name: cr-frontend
+  backend:
+    build: ./backend
+    ports:
+      - "5001:5000"
+    container_name: cr-backend
