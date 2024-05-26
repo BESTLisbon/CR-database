@@ -1,35 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import './App.css';
-import { BACKEND_URL } from './config/constants'; // Import the URL from the constants file
+import React from 'react';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import CompanyList from './components/CompanyList';
+import CompanyDetail from './components/CompanyDetail'; // Create this component for showing company details
 
 function App() {
-  const [companies, setCompanies] = useState([]);
-
-  useEffect(() => {
-    axios.get(`${BACKEND_URL}companies`)
-      .then(response => {
-        console.log('Response:', response.data);
-        setCompanies(response.data.companies);
-      })
-      .catch(error => {
-        console.error('Error fetching companies:', error);
-      });
-  }, []);
-
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>Company List</h1>
-      </header>
-      <main>
-        <ul>
-          {companies.map((company, index) => (
-            <li key={index}>{company}</li>
-          ))}
-        </ul>
-      </main>
-    </div>
+    <Router>
+      <Switch>
+        <Route exact path="/" component={CompanyList} />
+        <Route path="/companies/:companyName" component={CompanyDetail} />
+      </Switch>
+    </Router>
   );
 }
 
