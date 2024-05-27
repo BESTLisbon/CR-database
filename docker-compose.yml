@@ -5,11 +5,15 @@ services:
     build: ./frontend
     ports:
       - "3000:3000"
+    volumes:
+      - ./frontend:/frontend
     container_name: cr-frontend
   backend:
     build: ./backend
     ports:
       - "5001:5000"
+    volumes:
+      - ./backend:/app
     container_name: cr-backend
   db:
     image: postgres:latest
