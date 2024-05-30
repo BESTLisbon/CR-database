@@ -1,4 +1,5 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
+import { BACKEND_URL } from '../config/constants';
 import axios from 'axios';
 
 const AddCompanyForm: React.FC = () => {
@@ -19,7 +20,7 @@ const AddCompanyForm: React.FC = () => {
         event.preventDefault();
 
         try {
-            const response = await axios.post('/companies', {
+            const response = await axios.post(`${BACKEND_URL}/companies`, {
                 name,
                 abbreviation,
                 website,
@@ -75,7 +76,7 @@ const AddCompanyForm: React.FC = () => {
                 </div>
                 <button type="submit">Submit</button>
             </form>
-            {message && <p style={{ color: 'green' }}>{message}</p>}
+            {message && <p>{message}</p>}
             {error && <p style={{ color: 'red' }}>{error}</p>}
         </div>
     );

@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, request, jsonify
 import psycopg2
 from flask_cors import CORS
 
@@ -21,13 +21,35 @@ def get_db():
 def test():
     return jsonify(success=True)
 
-@app.route('/companies')
+@app.route('/companies', methods=['GET'])
 def list_companies():
     cur = get_db()
     cur.execute('SELECT name FROM company')
     companies = cur.fetchall()
     cur.close()
     return jsonify({'companies': [company[0] for company in companies]})
+
+@app.route('/companies', methods=['POST'])
+def add_company():
+    data = request.json
+    name = data.get('name')
+    abbreviation = data.get('abbreviation')
+    website = data.get('website')
+    if not name or not website:
+        return jsonify({'error': 'Name and website are required'}), 400
+    
+    try:
+        cur = get_db()
+        cur.execute('INSERT INTO company (name, abbreviation, website) VALUES (%s, %s, %s)', 
+                    (name, abbreviation, website))
+        cur.connection.commit()
+        cur.close()
+        return jsonify({'message': 'Company added successfully'}), 201
+    except psycopg2.IntegrityError as e:
+        return jsonify({'error': 'Company with this name already exists'}), 400
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 @app.route('/company/<string:company_name>')
 def get_company_info(company_name):
