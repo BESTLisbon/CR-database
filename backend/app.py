@@ -17,6 +17,10 @@ def get_db():
     conn = psycopg2.connect(**app.config['DATABASE'])
     return conn.cursor()
 
+@app.route('/test')
+def test():
+    return jsonify(success=True)
+
 @app.route('/companies')
 def list_companies():
     cur = get_db()
