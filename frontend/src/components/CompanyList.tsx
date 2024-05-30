@@ -19,13 +19,17 @@ function CompanyList() {
   return (
     <div>
       <h2>Company List</h2>
-      <ul>
-        {companies.map((company, index) => (
-          <li key={index}>
-            <Link to={`/companies/${company}`}>{company}</Link>
-          </li>
-        ))}
-      </ul>
+      {companies ? (
+        <ul>
+          {companies.map((company, index) => (
+            <li key={index}>
+              <Link to={`/companies/${company}`}>{company}</Link>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>Loading...</p>
+      )}
     </div>
   );
 }
