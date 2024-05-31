@@ -3,10 +3,18 @@ import psycopg2
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
-from config import ADMIN_USER
 
 app = Flask(__name__)
+app.config['JWT_SECRET_KEY'] = 'secret-key'
+jwt = JWTManager(app)
 CORS(app)
+
+@app.after_request
+def add_cors_headers(response):
+    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:3000'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+    return response
 
 app.config['DATABASE'] = {
     'host': 'db',
@@ -15,6 +23,7 @@ app.config['DATABASE'] = {
     'user': 'postgres',
     'password': 'postgres'
 }
+
 
 def get_db():
     conn = psycopg2.connect(**app.config['DATABASE'])
@@ -86,13 +95,12 @@ def login():
     if not email or not password:
         return jsonify({'error': 'Could not verify!'}), 401
 
-    conn = psycopg2.connect(**app.config['DATABASE'])
     cur = get_db()
     cur.execute("SELECT * FROM users WHERE email = %s", (email,))
     user = cur.fetchone()
     cur.close()
-
-    if not user or not check_password_hash(user[1], password):
+    stored_password_hash = user[3]
+    if not user or not check_password_hash(stored_password_hash, password):
         return jsonify({'error': 'Invalid email or password!'}), 401
 
     access_token = create_access_token(identity=email)
