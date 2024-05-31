@@ -86,11 +86,10 @@ def login():
         return jsonify({'error': 'Could not verify!'}), 401
 
     conn = psycopg2.connect(**app.config['DATABASE'])
-    cur = conn.cursor()
+    cur = get_db()
     cur.execute("SELECT * FROM users WHERE email = %s", (email,))
     user = cur.fetchone()
     cur.close()
-    conn.close()
 
     if not user or not check_password_hash(user[1], password):
         return jsonify({'error': 'Invalid email or password!'}), 401
