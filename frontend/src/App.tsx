@@ -12,9 +12,9 @@ const App: React.FC = () => {
       <Router>
         <Switch>
           <Route path="/login" component={Login} />
-          <CompanyForm />
-          <CompanyDetail />
-          <CompanyList />
+          <Route exact path="/" component={CompanyList} />
+          <Route path="/companies/new" component={CompanyForm} />
+          <Route path="/companies/:companyName" component={CompanyDetail} />
         </Switch>
       </Router>
     </AuthProvider>

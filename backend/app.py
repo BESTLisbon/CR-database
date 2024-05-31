@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify
 import psycopg2
 from flask_cors import CORS
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 
 app = Flask(__name__)
 CORS(app)
@@ -73,6 +75,28 @@ def get_company_info(company_name):
         'contacts': [{'type': contact[2], 'value': contact[3]} for contact in company_data if contact[2] and contact[3]]
     }
     return jsonify(company_info)
+
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.json
+    email = data.get('email')
+    password = data.get('password')
+
+    if not email or not password:
+        return jsonify({'error': 'Could not verify!'}), 401
+
+    conn = psycopg2.connect(**app.config['DATABASE'])
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM users WHERE email = %s", (email,))
+    user = cur.fetchone()
+    cur.close()
+    conn.close()
+
+    if not user or not check_password_hash(user[1], password):
+        return jsonify({'error': 'Invalid email or password!'}), 401
+
+    access_token = create_access_token(identity=email)
+    return jsonify({'access_token': access_token})
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
