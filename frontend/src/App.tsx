@@ -5,6 +5,7 @@ import CompanyDetail from './components/CompanyDetail';
 import CompanyForm from './components/CompanyForm';
 import Login from './components/Login';
 import { AuthProvider } from './context/AuthContext';
+import RegisterForm from './components/Register';
 
 const App: React.FC = () => {
   return (
@@ -12,6 +13,7 @@ const App: React.FC = () => {
       <Router>
         <Switch>
           <Route path="/login" component={Login} />
+          <Route path="/register" component={RegisterForm} />
           <Route exact path="/" component={CompanyList} />
           <Route path="/companies/new" component={CompanyForm} />
           <Route path="/companies/:companyName" component={CompanyDetail} />
