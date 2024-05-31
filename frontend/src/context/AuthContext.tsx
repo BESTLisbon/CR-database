@@ -1,50 +1,55 @@
-import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
-import axios from 'axios';
-import  { jwtDecode } from 'jwt-decode'; 
-import { BACKEND_URL } from '../config/constants';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { Route, Redirect } from 'react-router-dom';
 
+// Define the shape of authentication context
 interface AuthContextType {
-  user: any;
-  login: (username: string, password: string) => Promise<void>;
-  logout: () => void;
+  isAuthenticated: boolean;
+  updateAuthStatus: (status: boolean) => void;
 }
 
+// Create an Authentication Context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Authentication Provider
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<any>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
+    !!localStorage.getItem('token')
+  );
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      const user = jwtDecode(token);
-      setUser(user);
-    }
-  }, []);
-
-  const login = async (username: string, password: string) => {
-    const response = await axios.post(`${BACKEND_URL}login`, { username, password });
-    const token = response.data.access_token;
-    localStorage.setItem('token', token);
-    setUser(jwtDecode(token));
-  };
-
-  const logout = () => {
-    localStorage.removeItem('token');
-    setUser(null);
+  // Function to update authentication status
+  const updateAuthStatus = (status: boolean) => {
+    setIsAuthenticated(status);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, updateAuthStatus }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
+};
+
+// Private Route Component
+export const PrivateRoute: React.FC<{
+  component: React.ComponentType<any>;
+  path: string;
+  exact?: boolean;
+}> = ({ component: Component, ...rest }) => {
+  const { isAuthenticated } = useAuth();
+
+  return (
+    <Route
+      {...rest}
+      render={(props) =>
+        isAuthenticated ? <Component {...props} /> : <Redirect to="/login" />
+      }
+    />
+  );
 };
