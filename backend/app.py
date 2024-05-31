@@ -3,6 +3,7 @@ import psycopg2
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from config import ADMIN_USER
 
 app = Flask(__name__)
 CORS(app)
@@ -96,6 +97,36 @@ def login():
 
     access_token = create_access_token(identity=email)
     return jsonify({'access_token': access_token})
+
+@app.route('/register', methods=['POST'])
+def register():
+    data = request.json
+    email = data.get('email')
+    password = data.get('password')
+
+    if not email or not password:
+        return jsonify({'error': 'Email and password are required!'}), 400
+
+    hashed_password = generate_password_hash(password)
+
+    try:
+        cur = get_db()
+        cur.execute("INSERT INTO users (email, password) VALUES (%s, %s)", (email, hashed_password))
+        cur.connection.commit()
+        cur.close()
+        return jsonify({'message': 'User registered successfully!'}), 201
+    except psycopg2.IntegrityError:
+        return jsonify({'error': 'Email already exists!'}), 400
+    except Exception as e:
+        return jsonify({'error': 'An error occurred: {}'.format(str(e))}), 500
+
+@app.route('/test')
+def insert_admin_user():
+    #hashed_password = generate_password_hash(password)
+    cur = get_db().cursor()
+    cur.execute("INSERT INTO users (email, password) VALUES ('admin@example.com', 'admin')")
+    cur.connection.commit()
+    cur.close()
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
