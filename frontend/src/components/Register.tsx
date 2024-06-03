@@ -23,7 +23,7 @@ const RegisterForm: React.FC = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post(`${BACKEND_URL}/register`, formData);
+      const response = await axios.post(`${BACKEND_URL}auth/register`, formData);
       if (response.status !== 201) {
         throw new Error('Failed to register');
       }
