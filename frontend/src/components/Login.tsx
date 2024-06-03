@@ -9,7 +9,7 @@ const Login: React.FC = () => {
 
   const login = async (email: string, password: string): Promise<void> => {
     try {
-      const response = await axios.post(`${BACKEND_URL}login`, { email, password });
+      const response = await axios.post(`${BACKEND_URL}auth/login`, { email, password });
       
       if (response.status === 200) {
         localStorage.setItem('token', response.data.access_token);
