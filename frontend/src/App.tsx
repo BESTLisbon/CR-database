@@ -6,10 +6,12 @@ import CompanyForm from './components/CompanyForm';
 import Login from './components/Login';
 import { AuthProvider, PrivateRoute } from './context/AuthContext';
 import RegisterForm from './components/Register';
+import NavbarMain from './components/NavbarMain';
 
 const App: React.FC = () => {
   return (
     <AuthProvider>
+      <NavbarMain />
       <Router>
         <Switch>
           <Route path="/login" component={Login} />

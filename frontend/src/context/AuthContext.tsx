@@ -1,28 +1,63 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useCallback,
+  useEffect,
+} from 'react';
 import { Route, Redirect } from 'react-router-dom';
 
 // Define the shape of authentication context
+type AuthResponseType = {
+  email: string;
+  accessToken: string;
+};
+
 interface AuthContextType {
-  isAuthenticated: boolean;
-  updateAuthStatus: (status: boolean) => void;
+  auth: AuthResponseType;
+  setAuth: React.Dispatch<React.SetStateAction<AuthResponseType>>;
+  isLoggedIn: () => boolean;
+  loginFromResponse: (authResponse: AuthResponseType) => void;
+  loginFromLocalStorage: () => void;
 }
 
 // Create an Authentication Context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Authentication Provider
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
-    !!localStorage.getItem('token')
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
+  const [auth, setAuth] = useState<AuthResponseType>({
+    email: '',
+    accessToken: '',
+  });
+
+  useEffect(() => {
+    loginFromLocalStorage()
+  }, []);
+
+  const isLoggedIn = useCallback(
+    () => auth.accessToken !== '',
+    [auth.accessToken]
   );
 
-  // Function to update authentication status
-  const updateAuthStatus = (status: boolean) => {
-    setIsAuthenticated(status);
-  };
+  function loginFromResponse(authResponse: AuthResponseType) {
+    setAuth(authResponse);
+    localStorage.setItem('auth', JSON.stringify(authResponse));
+  }
+
+  function loginFromLocalStorage() {
+    const localAuth = localStorage.getItem('auth');
+    if (!localAuth) return;
+  
+    const auth: AuthResponseType = JSON.parse(localAuth);
+    setAuth(auth);
+  }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, updateAuthStatus }}>
+    <AuthContext.Provider value={{ auth, setAuth, isLoggedIn, loginFromResponse, loginFromLocalStorage }}>
       {children}
     </AuthContext.Provider>
   );
@@ -42,13 +77,13 @@ export const PrivateRoute: React.FC<{
   path: string;
   exact?: boolean;
 }> = ({ component: Component, ...rest }) => {
-  const { isAuthenticated } = useAuth();
+  const { isLoggedIn } = useAuth();
 
   return (
     <Route
       {...rest}
       render={(props) =>
-        isAuthenticated ? <Component {...props} /> : <Redirect to="/login" />
+        isLoggedIn() ? <Component {...props} /> : <Redirect to='/login' />
       }
     />
   );
