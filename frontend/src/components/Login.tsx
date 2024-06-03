@@ -1,19 +1,23 @@
 import React, { useState, FormEvent } from 'react';
 import { BACKEND_URL } from '../config/constants';
 import axios from 'axios';
-
+import { useAuth } from '../context/AuthContext';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const { loginFromResponse } = useAuth();
 
   const login = async (email: string, password: string): Promise<void> => {
     try {
-      const response = await axios.post(`${BACKEND_URL}auth/login`, { email, password });
-      
+      const response = await axios.post(`${BACKEND_URL}auth/login`, {
+        email,
+        password,
+      });
+
       if (response.status === 200) {
-        localStorage.setItem('token', response.data.access_token);
-        console.log(response.data.access_token)
+        localStorage.setItem('auth', JSON.stringify(response.data));
+        loginFromResponse(response.data);
       } else {
         console.error(response.data.error);
       }
@@ -21,7 +25,6 @@ const Login: React.FC = () => {
       console.error('An error occurred:', error);
     }
   };
-  
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -33,7 +36,7 @@ const Login: React.FC = () => {
       <div>
         <label>Email:</label>
         <input
-          type="text"
+          type='text'
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -42,13 +45,13 @@ const Login: React.FC = () => {
       <div>
         <label>Password:</label>
         <input
-          type="password"
+          type='password'
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
         />
       </div>
-      <button type="submit">Login</button>
+      <button type='submit'>Login</button>
     </form>
   );
 };
