@@ -29,7 +29,7 @@ def login():
         return jsonify({"error": "Invalid email or password!"}), 401
 
     access_token = create_access_token(identity=email)
-    return jsonify({"access_token": access_token})
+    return jsonify({"email": email, "access_token": access_token})
 
 
 @authbp.route("/register", methods=["POST"])
@@ -51,7 +51,8 @@ def register():
         )
         cur.connection.commit()
         cur.close()
-        return jsonify({"message": "User registered successfully!"}), 201
+        access_token = create_access_token(identity=email)
+        return jsonify({"email": email, "access_token": access_token}), 201
     except psycopg2.IntegrityError:
         return jsonify({"error": "Email already exists!"}), 400
     except Exception as e:
