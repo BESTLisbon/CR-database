@@ -20,6 +20,7 @@ interface AuthContextType {
   isLoggedIn: () => boolean;
   loginFromResponse: (authResponse: AuthResponseType) => void;
   loginFromLocalStorage: () => void;
+  logout: () => void;
 }
 
 // Create an Authentication Context
@@ -35,7 +36,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   });
 
   useEffect(() => {
-    loginFromLocalStorage()
+    loginFromLocalStorage();
   }, []);
 
   const isLoggedIn = useCallback(
@@ -51,13 +52,27 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   function loginFromLocalStorage() {
     const localAuth = localStorage.getItem('auth');
     if (!localAuth) return;
-  
+
     const auth: AuthResponseType = JSON.parse(localAuth);
     setAuth(auth);
   }
 
+  function logout() {
+    localStorage.removeItem('auth');
+    setAuth({ email: '', accessToken: '' });
+  }
+
   return (
-    <AuthContext.Provider value={{ auth, setAuth, isLoggedIn, loginFromResponse, loginFromLocalStorage }}>
+    <AuthContext.Provider
+      value={{
+        auth,
+        setAuth,
+        isLoggedIn,
+        loginFromResponse,
+        loginFromLocalStorage,
+        logout
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
