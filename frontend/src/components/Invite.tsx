@@ -30,6 +30,7 @@ const Invite: React.FC = () => {
 
   return (
     <form onSubmit={handleSubmit}>
+      {success ? <div>Success!</div> : <></>}
       <div>
         <label>Email:</label>
         <input
