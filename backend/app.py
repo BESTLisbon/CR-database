@@ -1,8 +1,8 @@
-from flask import Flask, request, jsonify
+from flask import Flask, g, request, jsonify
 from flask_jwt_extended import JWTManager
 import psycopg2
 from flask_cors import CORS
-from .db import get_db
+from .db import get_cursor
 from .auth import authbp
 
 app = Flask(__name__)
@@ -20,6 +20,13 @@ def add_cors_headers(response):
     return response
 
 
+@app.teardown_appcontext
+def close_connection(exception):
+    db = getattr(g, "_db", None)
+    if db is not None:
+        db.close()
+
+
 app.config["DATABASE"] = {
     "host": "db",
     "port": "5432",
@@ -31,7 +38,7 @@ app.config["DATABASE"] = {
 
 @app.route("/companies", methods=["GET"])
 def list_companies():
-    cur = get_db()
+    cur = get_cursor()
     cur.execute("SELECT name FROM company")
     companies = cur.fetchall()
     cur.close()
@@ -48,7 +55,7 @@ def add_company():
         return jsonify({"error": "Name and website are required"}), 400
 
     try:
-        cur = get_db()
+        cur = get_cursor()
         cur.execute(
             "INSERT INTO company (name, abbreviation, website) VALUES (%s, %s, %s)",
             (name, abbreviation, website),
@@ -64,7 +71,7 @@ def add_company():
 
 @app.route("/company/<string:company_name>")
 def get_company_info(company_name):
-    cur = get_db()
+    cur = get_cursor()
     cur.execute(
         """
         SELECT c.name, m.address, co.type, co.contact
