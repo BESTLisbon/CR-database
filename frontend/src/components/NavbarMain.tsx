@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
+import { Link } from 'react-router-dom';
 
 const NavbarMain: React.FC = () => {
   const { isLoggedIn, logout } = useAuth();
@@ -14,6 +15,11 @@ const NavbarMain: React.FC = () => {
       ) : (
         <h4>Not logged in</h4>
       )}
+      <div style={{display: "flex", flexDirection: "row", gap: "5px", margin: "10px 0px"}}>
+        <Link to="/login">Login</Link>
+        <Link to="/register">Register</Link>
+        <Link to="/invite">Invite</Link>
+      </div>
     </>
   );
 };

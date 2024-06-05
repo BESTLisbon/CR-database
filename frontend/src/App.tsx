@@ -8,15 +8,17 @@ import { AuthProvider } from './context/AuthContext';
 import { PrivateRoute } from './components/PrivateRoute';
 import RegisterForm from './components/Register';
 import NavbarMain from './components/NavbarMain';
+import Invite from './components/Invite';
 
 const App: React.FC = () => {
   return (
     <AuthProvider>
-      <NavbarMain />
       <Router>
+        <NavbarMain />
         <Switch>
           <Route path="/login" component={Login} />
           <Route path="/register" component={RegisterForm} />
+          <PrivateRoute path="/invite" component={Invite} />
           <PrivateRoute exact path="/" component={CompanyList} />
           <PrivateRoute path="/companies/new" component={CompanyForm} />
           <PrivateRoute path="/companies/:companyName" component={CompanyDetail} />
