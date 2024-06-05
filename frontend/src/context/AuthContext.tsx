@@ -6,7 +6,6 @@ import React, {
   useCallback,
   useEffect,
 } from 'react';
-import { Route, Redirect } from 'react-router-dom';
 
 // Define the shape of authentication context
 type AuthResponseType = {
@@ -84,22 +83,4 @@ export const useAuth = (): AuthContextType => {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-};
-
-// Private Route Component
-export const PrivateRoute: React.FC<{
-  component: React.ComponentType<any>;
-  path: string;
-  exact?: boolean;
-}> = ({ component: Component, ...rest }) => {
-  const { isLoggedIn } = useAuth();
-
-  return (
-    <Route
-      {...rest}
-      render={(props) =>
-        isLoggedIn() ? <Component {...props} /> : <Redirect to='/login' />
-      }
-    />
-  );
 };
