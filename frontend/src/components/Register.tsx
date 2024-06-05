@@ -5,12 +5,14 @@ import { BACKEND_URL } from '../config/constants';
 interface RegisterFormData {
   email: string;
   password: string;
+  name: string;
 }
 
 const RegisterForm: React.FC = () => {
   const [formData, setFormData] = useState<RegisterFormData>({
     email: '',
-    password: ''
+    password: '',
+    name: '',
   });
   const [errorMessage, setErrorMessage] = useState<string>('');
 
@@ -51,6 +53,16 @@ const RegisterForm: React.FC = () => {
             type="email"
             name="email"
             value={formData.email}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div>
+          <label>Name:</label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
             onChange={handleChange}
             required
           />
