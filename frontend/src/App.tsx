@@ -4,7 +4,8 @@ import CompanyList from './components/CompanyList';
 import CompanyDetail from './components/CompanyDetail';
 import CompanyForm from './components/CompanyForm';
 import Login from './components/Login';
-import { AuthProvider, PrivateRoute } from './context/AuthContext';
+import { AuthProvider } from './context/AuthContext';
+import { PrivateRoute } from './components/PrivateRoute';
 import RegisterForm from './components/Register';
 import NavbarMain from './components/NavbarMain';
 
