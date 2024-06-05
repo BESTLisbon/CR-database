@@ -26,11 +26,12 @@ VALUES
     ('phone', '555-9876', 3);
 
 INSERT INTO
-    users (nome, email, password, role, active)
+    users (name, email, password, role, active)
 VALUES
     (
         'admin',
         'admin@admin.com',
+        -- pwd: "admin"
         'scrypt:32768:8:1$kAv5kLHRBo1QMTGg$98098abbd3d2864f85b7a56c9490bda6e7a73792c52a8a7520a6d23378344c13083472c8aa11c0cda7694480079b841c5f4f03ec8d34a256e67c3319be18152d',
         'Admin',
         TRUE
