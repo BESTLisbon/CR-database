@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { BACKEND_URL } from '../config/constants';
 import { Company } from '../types';
 import { axiosInstance } from '../config/axiosInstance';
 

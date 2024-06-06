@@ -1,5 +1,4 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
-import { BACKEND_URL } from '../config/constants';
 import axios from 'axios';
 import { axiosInstance } from '../config/axiosInstance';
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Switch } from 'react-router-dom';
 import CompanyList from './components/CompanyList';
 import CompanyDetail from './components/CompanyDetail';
 import CompanyForm from './components/CompanyForm';
