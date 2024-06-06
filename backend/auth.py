@@ -3,6 +3,8 @@ import psycopg2
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_jwt_extended import (
     create_access_token,
+    create_refresh_token,
+    get_jwt_identity,
     jwt_required,
 )
 
@@ -33,7 +35,16 @@ def login():
 
     user = User.user_from_query(user)
     access_token = create_access_token(identity=email)
-    return jsonify({"email": user.to_dict(), "access_token": access_token})
+    refresh_token = create_refresh_token(identity=email)
+    return jsonify(
+        {
+            "user": user.to_dict(),
+            "auth": {
+                "accessToken": access_token,
+                "refreshToken": refresh_token,
+            },
+        }
+    )
 
 
 @authbp.route("/register", methods=["POST"])
@@ -45,13 +56,13 @@ def register():
 
     if not email or not password or not name:
         return jsonify({"error": "Please provide all the fields required"}), 400
-    
+
     if not User.valid_password(password):
         return jsonify({"error": "Invalid password"}), 400
-    
+
     if not User.valid_email(email):
         return jsonify({"error": "Invalid email"}), 400
-    
+
     if not User.valid_name(name):
         return jsonify({"error": "Invalid name"}), 400
 
@@ -62,17 +73,19 @@ def register():
         with get_cursor() as cur:
             cur.execute("SELECT * FROM users WHERE email=%s;", (email,))
             user = cur.fetchone()
-            if not user: # Is not invited
+            if not user:  # Is not invited
                 return (
                     jsonify(
                         {"error": f"User with email {email} has not been invited yet"}
                     ),
                     401,
                 )
-            if user[-1]: # Is already active
+            if user[-1]:  # Is already active
                 return (
                     jsonify(
-                        {"error": f"User with email {email} has already been registered"}
+                        {
+                            "error": f"User with email {email} has already been registered"
+                        }
                     ),
                     401,
                 )
@@ -93,8 +106,20 @@ def register():
             )
             cur.connection.commit()
         access_token = create_access_token(identity=email)
+        refresh_token = create_refresh_token(identity=email)
         user = User.user_from_register_form(email, name)
-        return jsonify({"user": user.to_dict(), "access_token": access_token}), 201
+        return (
+            jsonify(
+                {
+                    "user": user.to_dict(),
+                    "auth": {
+                        "accessToken": access_token,
+                        "refreshToken": refresh_token,
+                    },
+                }
+            ),
+            201,
+        )
     except psycopg2.Error as e:
         return jsonify({"error": "An error occurred: {}".format(str(e))}), 500
 
@@ -108,7 +133,7 @@ def invite():
 
     if not email:
         return jsonify({"error": "Email is required!"}), 400
-    
+
     if not User.valid_email(email):
         return jsonify({"error": "Invalid email address!"}), 400
 
@@ -124,3 +149,11 @@ def invite():
         return jsonify({"error": "Email already invited!"}), 400
     except psycopg2.Error as e:
         return jsonify({"error": "An error occurred: {}".format(str(e))}), 500
+
+
+@authbp.route("/refresh", methods=["POST"])
+@jwt_required(refresh=True)
+def refresh():
+    identity = get_jwt_identity()
+    access_token = create_access_token(identity=identity)
+    return jsonify(access_token=access_token)

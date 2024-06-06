@@ -1,5 +1,6 @@
+from datetime import timedelta
 from flask import Flask, g, request, jsonify
-from flask_jwt_extended import JWTManager
+from flask_jwt_extended import JWTManager, jwt_required
 import psycopg2
 from flask_cors import CORS
 from .db import get_cursor
@@ -8,6 +9,8 @@ from .auth import authbp
 app = Flask(__name__)
 app.register_blueprint(authbp)
 app.config["JWT_SECRET_KEY"] = "secret-key"
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=30)
+app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)
 jwt = JWTManager(app)
 CORS(app)
 
@@ -37,15 +40,17 @@ app.config["DATABASE"] = {
 
 
 @app.route("/companies", methods=["GET"])
+@jwt_required()
 def list_companies():
-    cur = get_cursor()
-    cur.execute("SELECT name FROM company")
-    companies = cur.fetchall()
-    cur.close()
+    with get_cursor() as cur:
+        cur.execute("SELECT name FROM company")
+        companies = cur.fetchall()
+    
     return jsonify({"companies": [company[0] for company in companies]})
 
 
 @app.route("/companies", methods=["POST"])
+@jwt_required()
 def add_company():
     data = request.json
     name = data.get("name")
@@ -55,13 +60,12 @@ def add_company():
         return jsonify({"error": "Name and website are required"}), 400
 
     try:
-        cur = get_cursor()
-        cur.execute(
-            "INSERT INTO company (name, abbreviation, website) VALUES (%s, %s, %s)",
-            (name, abbreviation, website),
-        )
-        cur.connection.commit()
-        cur.close()
+        with get_cursor() as cur:
+            cur.execute(
+                "INSERT INTO company (name, abbreviation, website) VALUES (%s, %s, %s)",
+                (name, abbreviation, website),
+            )
+            cur.connection.commit()
         return jsonify({"message": "Company added successfully"}), 201
     except psycopg2.IntegrityError as e:
         return jsonify({"error": "Company with this name already exists"}), 400
@@ -70,20 +74,20 @@ def add_company():
 
 
 @app.route("/company/<string:company_name>")
+@jwt_required()
 def get_company_info(company_name):
-    cur = get_cursor()
-    cur.execute(
-        """
-        SELECT c.name, m.address, co.type, co.contact
-        FROM company c
-        LEFT JOIN morada m ON c.company_id = m.company_id
-        LEFT JOIN contact co ON c.company_id = co.company_id
-        WHERE c.name = %s
-    """,
-        (company_name,),
-    )
-    company_data = cur.fetchall()
-    cur.close()
+    with get_cursor() as cur:
+        cur.execute(
+            """
+            SELECT c.name, m.address, co.type, co.contact
+            FROM company c
+            LEFT JOIN morada m ON c.company_id = m.company_id
+            LEFT JOIN contact co ON c.company_id = co.company_id
+            WHERE c.name = %s
+        """,
+            (company_name,),
+        )
+        company_data = cur.fetchall()
 
     if not company_data:
         return jsonify({"error": "Company not found"}), 404
