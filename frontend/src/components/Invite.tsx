@@ -1,7 +1,5 @@
 import React, { useState, FormEvent } from 'react';
-import { BACKEND_URL } from '../config/constants';
-import axios from 'axios';
-import { useAuth } from '../context/AuthContext';
+import { axiosInstance } from '../config/axiosInstance';
 
 const Invite: React.FC = () => {
   const [email, setEmail] = useState<string>('');
@@ -9,7 +7,7 @@ const Invite: React.FC = () => {
 
   const invite = async (email: string): Promise<void> => {
     try {
-      const response = await axios.post(`${BACKEND_URL}auth/invite`, {
+      const response = await axiosInstance.post('/auth/invite', {
         email,
       });
 

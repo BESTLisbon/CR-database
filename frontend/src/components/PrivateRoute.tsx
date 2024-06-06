@@ -9,11 +9,11 @@ export const PrivateRoute: React.FC<{
   path: string;
   exact?: boolean;
 }> = ({ component: Component, ...rest }) => {
-  const { isLoggedIn } = useAuth();
+  const { state } = useAuth();
 
   return (
     <Route
       {...rest}
-      render={(props) => isLoggedIn() ? <Component {...props} /> : <Redirect to='/login' />} />
+      render={(props) => state ? <Component {...props} /> : <Redirect to='/login' />} />
   );
 };

@@ -9,11 +9,14 @@ import { PrivateRoute } from './components/PrivateRoute';
 import RegisterForm from './components/Register';
 import NavbarMain from './components/NavbarMain';
 import Invite from './components/Invite';
+import AxiosInterceptorSetup from './components/AxiosInterceptorSetup';
 
 const App: React.FC = () => {
+
   return (
     <AuthProvider>
       <Router>
+        <AxiosInterceptorSetup />
         <NavbarMain />
         <Switch>
           <Route path="/login" component={Login} />

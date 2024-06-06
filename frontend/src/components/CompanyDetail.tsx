@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
 import { BACKEND_URL } from '../config/constants';
 import { Company } from '../types';
+import { axiosInstance } from '../config/axiosInstance';
 
 interface CompanyDetailProps {
     companyName: string;
 }
 
-function CompanyDetail() {
+const CompanyDetail: React.FC = () => {
   const { companyName } = useParams<CompanyDetailProps>();
   const [companyDetails, setCompanyDetails] = useState<Company | null>(null);
 
   useEffect(() => {
-    axios.get(`${BACKEND_URL}/company/${companyName}`)
+    axiosInstance.get(`/company/${companyName}`)
       .then(response => {
         setCompanyDetails(response.data);
       })
