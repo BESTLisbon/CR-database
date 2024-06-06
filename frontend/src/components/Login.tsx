@@ -1,16 +1,25 @@
 import React, { useState, FormEvent } from 'react';
-import { BACKEND_URL } from '../config/constants';
-import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { useHistory, useLocation } from 'react-router-dom';
+import { axiosInstance } from '../config/axiosInstance';
+
+interface LocationState {
+  from: {
+    pathname: string;
+  };
+}
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const { loginFromResponse } = useAuth();
+  let history = useHistory();
+  let location = useLocation<LocationState>();
+  let { from } = location.state || { from: { pathname: '/' } };
 
   const login = async (email: string, password: string): Promise<void> => {
     try {
-      const response = await axios.post(`${BACKEND_URL}auth/login`, {
+      const response = await axiosInstance.post('/auth/login', {
         email,
         password,
       });
@@ -18,6 +27,7 @@ const Login: React.FC = () => {
       if (response.status === 200) {
         localStorage.setItem('auth', JSON.stringify(response.data));
         loginFromResponse(response.data);
+        history.replace(from);
       } else {
         console.error(response.data.error);
       }

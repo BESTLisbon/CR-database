@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Link } from 'react-router-dom';
-import { BACKEND_URL } from '../config/constants';
+import { axiosInstance } from '../config/axiosInstance';
 
 interface CompanyListResponse {
   companies: string[];
@@ -11,7 +10,7 @@ const CompanyList: React.FC = () => {
   const [companies, setCompanies] = useState<string[]>([]);
 
   useEffect(() => {
-    axios.get<CompanyListResponse>(`${BACKEND_URL}/companies`)
+    axiosInstance.get<CompanyListResponse>('/companies')
       .then(response => {
         setCompanies(response.data.companies);
       })

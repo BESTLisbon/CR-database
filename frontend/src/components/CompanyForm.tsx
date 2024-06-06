@@ -1,6 +1,6 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
-import { BACKEND_URL } from '../config/constants';
 import axios from 'axios';
+import { axiosInstance } from '../config/axiosInstance';
 
 const AddCompanyForm: React.FC = () => {
     const [name, setName] = useState<string>('');
@@ -20,7 +20,7 @@ const AddCompanyForm: React.FC = () => {
         event.preventDefault();
 
         try {
-            const response = await axios.post(`${BACKEND_URL}/companies`, {
+            const response = await axiosInstance.post('/companies', {
                 name,
                 abbreviation,
                 website,

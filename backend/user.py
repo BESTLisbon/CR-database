@@ -48,7 +48,7 @@ class User:
 
     @staticmethod
     def valid_email(email: str) -> bool:
-        """Validates names (length and no special characters)"""
+        """Validates emails"""
         email_pattern = re.compile(
             r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
         )
