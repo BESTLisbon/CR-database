@@ -1,3 +1,4 @@
+from functools import wraps
 from flask import Blueprint, current_app, jsonify, request
 import psycopg2
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -14,6 +15,38 @@ from .db import get_cursor
 
 
 authbp = Blueprint("auth", __name__, url_prefix="/auth")
+
+
+def admin_required(fn):
+    @wraps(fn)
+    @jwt_required()
+    def wrapper(*args, **kwargs):
+        identity = get_jwt_identity()
+        with get_cursor() as cur:
+            cur.execute("SELECT role FROM users WHERE email=%s;", (identity,))
+            role = cur.fetchone()
+
+        if not role or role[0] != "Admin":
+            return jsonify({"msg": "Admin privileges required!"}), 401
+        return fn(args, kwargs)
+
+    return wrapper
+
+
+def coordie_required(fn):
+    @wraps(fn)
+    @jwt_required()
+    def wrapper(*args, **kwargs):
+        identity = get_jwt_identity()
+        with get_cursor() as cur:
+            cur.execute("SELECT role FROM users WHERE email=%s;", (identity,))
+            role = cur.fetchone()
+
+        if not role or role[0] not in ["Admin", "Coordie"]:
+            return jsonify({"msg": "Coordie privileges required!"}), 401
+        return fn(args, kwargs)
+
+    return wrapper
 
 
 @authbp.route("/login", methods=["POST"])
@@ -125,7 +158,7 @@ def register():
 
 
 @authbp.route("/invite", methods=["POST"])
-@jwt_required()
+@coordie_required
 def invite():
     data = request.json
     email = data.get("email")
