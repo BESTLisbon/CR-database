@@ -15,7 +15,7 @@ const Login: React.FC = () => {
   const { loginFromResponse } = useAuth();
   let history = useHistory();
   let location = useLocation<LocationState>();
-  let { from } = location.state || { from: { pathname: "/" } };
+  let { from } = location.state || { from: { pathname: '/' } };
 
   const login = async (email: string, password: string): Promise<void> => {
     try {

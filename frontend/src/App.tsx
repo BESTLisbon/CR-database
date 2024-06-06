@@ -20,21 +20,35 @@ const App: React.FC = () => {
     return false;
   }
 
+  function isNotLoggedIn(state: AuthResponseType | undefined) {
+    return state === undefined;
+  }
+
   return (
     <AuthProvider>
       <Router>
         <AxiosInterceptorSetup />
         <NavbarMain />
         <Switch>
-          <Route path='/login' component={Login} />
-          <Route path='/register' component={RegisterForm} />
+          <PrivateRoute exact path='/' component={CompanyList} />
+          <PrivateRoute
+            condition={isNotLoggedIn}
+            redirectTo='/'
+            path='/login'
+            component={Login}
+          />
+          <PrivateRoute
+            condition={isNotLoggedIn}
+            redirectTo='/'
+            path='/register'
+            component={RegisterForm}
+          />
           <PrivateRoute
             condition={canInvite}
             redirectTo='/'
             path='/invite'
             component={Invite}
           />
-          <PrivateRoute exact path='/' component={CompanyList} />
           <PrivateRoute path='/companies/new' component={CompanyForm} />
           <PrivateRoute
             path='/companies/:companyName'
