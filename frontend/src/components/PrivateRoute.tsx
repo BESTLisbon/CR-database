@@ -1,19 +1,35 @@
 import React from 'react';
-import { Route, Redirect } from 'react-router-dom';
+import { Route, Redirect, RouteProps } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { AuthResponseType } from '../models/auth';
 
 // Private Route Component
 
-export const PrivateRoute: React.FC<{
+interface PrivateRouteProps extends RouteProps {
   component: React.ComponentType<any>;
-  path: string;
-  exact?: boolean;
-}> = ({ component: Component, ...rest }) => {
+  condition?: (state: AuthResponseType | undefined) => boolean;
+  redirectTo?: string;
+}
+
+export const PrivateRoute: React.FC<PrivateRouteProps> = ({
+  component: Component,
+  condition,
+  redirectTo = '/login',
+  ...rest
+}) => {
   const { state } = useAuth();
+
+  function getCondition() {
+    if (!condition) return !!state;
+    return condition(state);
+  }
 
   return (
     <Route
       {...rest}
-      render={(props) => state ? <Component {...props} /> : <Redirect to='/login' />} />
+      render={(props) =>
+        getCondition() ? <Component {...props} /> : <Redirect to={redirectTo} />
+      }
+    />
   );
 };
